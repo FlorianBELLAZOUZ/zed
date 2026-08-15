@@ -494,7 +494,7 @@ async fn poll_path_until_created(
             return;
         }
 
-        if smol::fs::symlink_metadata(path.as_ref()).await.is_err() {
+        if fs::symlink_metadata(path.as_ref()).is_err() {
             continue;
         }
 
@@ -1278,10 +1278,6 @@ mod tests {
 
         std::fs::write(&path, b"contents").expect("create path");
 
-        // poll_path_until_created stats the path on smol's blocking pool, which
-        // the deterministic executor cannot drive; park until the poll task
-        // signals the event channel.
-        cx.executor().allow_parking();
         cx.executor().advance_clock(poll_interval());
         rx.recv().await.expect("receive watcher event");
 
